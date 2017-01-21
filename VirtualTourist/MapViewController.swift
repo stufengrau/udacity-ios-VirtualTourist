@@ -21,8 +21,45 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        mapView.delegate = self
         deleteLabel.isHidden = true
     }
+    
+    @IBAction func tappedOnMap(_ sender: UILongPressGestureRecognizer) {
+        if sender.state == UIGestureRecognizerState.began {
+            
+            // Get the tapped location, which is a CGPoint
+            let location = sender.location(in: mapView)
+            // A CLLocationCoordinate2D is needed to set the coordinate for the annotation
+            let coordinate = mapView.convert(location, toCoordinateFrom: mapView)
+            
+            // Add annotation
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = coordinate
+            mapView.addAnnotation(annotation)
+        }
+    }
+    
+    // MARK: MKMapViewDelegate
+    
+    // Animate new pin drop
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        
+        let reuseId = "pin"
+        
+        var pinView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseId) as? MKPinAnnotationView
+        
+        if pinView == nil {
+            pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
+            pinView!.animatesDrop = true
+        } else {
+            pinView!.annotation = annotation
+        }
+        
+        return pinView
+    }
+    
     
     /*
      // MARK: - Navigation
