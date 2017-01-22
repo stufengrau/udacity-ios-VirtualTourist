@@ -24,9 +24,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             if editMode! {
                 navigationItem.rightBarButtonItem = doneButton
                 deletionHint.isHidden = false
+                mapView.frame.origin.y -= deletionHint.bounds.size.height
             } else {
                 navigationItem.rightBarButtonItem = editButton
                 deletionHint.isHidden = true
+                mapView.frame.origin.y += deletionHint.bounds.size.height
             }
         }
     }
@@ -60,6 +62,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     func toggleEditMode(_ sender: UIBarButtonItem) {
         editMode = !editMode
+        
+        // TODO: shift map view up (height of label)
     }
     
     // MARK: MKMapViewDelegate
