@@ -21,6 +21,13 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="Oj8-lh-rCG">
+                                <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                                <gestureRecognizers/>
+                                <connections>
+                                    <outletCollection property="gestureRecognizers" destination="EeK-3c-rmJ" appends="YES" id="loW-cZ-L29"/>
+                                </connections>
+                            </mapView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tap Pins to Delete" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pSk-pd-tvq">
                                 <rect key="frame" x="0.0" y="587" width="375" height="80"/>
                                 <color key="backgroundColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
@@ -31,13 +38,6 @@
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="Oj8-lh-rCG">
-                                <rect key="frame" x="0.0" y="64" width="375" height="603"/>
-                                <gestureRecognizers/>
-                                <connections>
-                                    <outletCollection property="gestureRecognizers" destination="EeK-3c-rmJ" appends="YES" id="loW-cZ-L29"/>
-                                </connections>
-                            </mapView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
@@ -50,12 +50,9 @@
                             <constraint firstAttribute="trailing" secondItem="pSk-pd-tvq" secondAttribute="trailing" id="yI0-Mv-96H"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Virtual Tourist" id="SUH-SK-Bxh">
-                        <barButtonItem key="rightBarButtonItem" systemItem="edit" id="Gnd-8m-ETX"/>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" title="Virtual Tourist" id="SUH-SK-Bxh"/>
                     <connections>
-                        <outlet property="deleteLabel" destination="pSk-pd-tvq" id="gYn-Kb-hoU"/>
-                        <outlet property="editButton" destination="Gnd-8m-ETX" id="cv6-oz-JlJ"/>
+                        <outlet property="deletionHint" destination="pSk-pd-tvq" id="yZM-Gw-mbE"/>
                         <outlet property="mapView" destination="Oj8-lh-rCG" id="VD1-Mf-Xk5"/>
                     </connections>
                 </viewController>

@@ -13,17 +13,34 @@ class MapViewController: UIViewController, MKMapViewDelegate {
 
     // MARK: Properties
     
-    @IBOutlet weak var deleteLabel: UILabel!
-    @IBOutlet weak var editButton: UIBarButtonItem!
+    @IBOutlet weak var deletionHint: UILabel!
     @IBOutlet weak var mapView: MKMapView!
+
+    var doneButton: UIBarButtonItem?
+    var editButton: UIBarButtonItem?
+    
+    var editMode: Bool! {
+        didSet {
+            if editMode! {
+                navigationItem.rightBarButtonItem = doneButton
+                deletionHint.isHidden = false
+            } else {
+                navigationItem.rightBarButtonItem = editButton
+                deletionHint.isHidden = true
+            }
+        }
+    }
     
     // MARK: View Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(toggleEditMode(_:)))
+        editButton = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(toggleEditMode(_:)))
+        editMode = false
+
         mapView.delegate = self
-        deleteLabel.isHidden = true
     }
     
     @IBAction func tappedOnMap(_ sender: UILongPressGestureRecognizer) {
@@ -39,6 +56,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             annotation.coordinate = coordinate
             mapView.addAnnotation(annotation)
         }
+    }
+    
+    func toggleEditMode(_ sender: UIBarButtonItem) {
+        editMode = !editMode
     }
     
     // MARK: MKMapViewDelegate
@@ -60,6 +81,15 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         return pinView
     }
     
+    // If a pin is tapped, show the photosViewController
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        if editMode! {
+            mapView.removeAnnotation(view.annotation!)
+        } else {
+            let vc = storyboard?.instantiateViewController(withIdentifier: "photosViewController")
+            navigationController?.pushViewController(vc!, animated: true)
+        }
+    }
     
     /*
      // MARK: - Navigation
