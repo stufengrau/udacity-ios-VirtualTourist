@@ -43,6 +43,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         editMode = false
 
         mapView.delegate = self
+        
+        if let region = DefaultStore.shared.region {
+            mapView.region = region
+        }
     }
     
     @IBAction func tappedOnMap(_ sender: UILongPressGestureRecognizer) {
@@ -62,8 +66,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     func toggleEditMode(_ sender: UIBarButtonItem) {
         editMode = !editMode
-        
-        // TODO: shift map view up (height of label)
     }
     
     // MARK: MKMapViewDelegate
@@ -86,6 +88,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     // If a pin is tapped, show the photosViewController
+    // TODO: if a pin was selected before deletion, tap does nothing
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         if editMode! {
             mapView.removeAnnotation(view.annotation!)
@@ -93,6 +96,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             let vc = storyboard?.instantiateViewController(withIdentifier: "photosViewController")
             navigationController?.pushViewController(vc!, animated: true)
         }
+    }
+    
+    // Save region of the mapView when region changed
+    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        DefaultStore.shared.region = mapView.region
     }
     
     /*
