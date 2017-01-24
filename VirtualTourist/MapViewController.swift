@@ -11,12 +11,12 @@ import MapKit
 import CoreData
 
 class MapViewController: UIViewController, MKMapViewDelegate {
-
+    
     // MARK: Properties
     
     @IBOutlet weak var deletionHint: UILabel!
     @IBOutlet weak var mapView: MKMapView!
-
+    
     var doneButton: UIBarButtonItem?
     var editButton: UIBarButtonItem?
     
@@ -38,7 +38,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             }
         }
     }
-
+    
     
     // MARK: View Lifecycle
     
@@ -49,14 +49,14 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         editButton = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(toggleEditMode(_:)))
         
         editMode = false
-
+        
         mapView.delegate = self
         
         // if the map region was saved before, set it to last values
         if let region = DefaultStore.shared.region {
             mapView.region = region
         }
-
+        
         // try to retrieve and add annotations to the map
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Pin")
         if let pins = try? stack.context.fetch(fetchRequest) as! [Pin] {
@@ -64,7 +64,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 $0.makeAnnotation()
             }))
         }
-   }
+    }
     
     @IBAction func tappedOnMap(_ sender: UILongPressGestureRecognizer) {
         if sender.state == UIGestureRecognizerState.began {
@@ -73,7 +73,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             let location = sender.location(in: mapView)
             // A CLLocationCoordinate2D is needed to set the coordinate for the annotation
             let coordinate = mapView.convert(location, toCoordinateFrom: mapView)
-
+            
             let annotation = MKPointAnnotation()
             annotation.coordinate = coordinate
             
@@ -100,7 +100,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
 }
 
 extension MapViewController {
-
+    
     // MARK: MKMapViewDelegate
     
     // Create pin views with animated pin drop
@@ -121,13 +121,16 @@ extension MapViewController {
     }
     
     // If a pin is tapped, show the photosViewController
-    // TODO: if a pin was selected before deletion, tap does nothing
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         
         guard let annotation = view.annotation else {
             assertionFailure("Annotation just get tapped and therefore should be present")
             return
         }
+        
+        // Deselect the annotation straightaway
+        // otherwise a second tap on the same annotation won't work
+        mapView.deselectAnnotation(annotation, animated: false)
         
         // Try to get the correct core data object for the tapped annotation
         
@@ -160,6 +163,6 @@ extension MapViewController {
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         DefaultStore.shared.region = mapView.region
     }
-
+    
 }
 
