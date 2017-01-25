@@ -88,15 +88,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         editMode = !editMode
     }
     
-    /*
-     // MARK: - Navigation
-     
-     // In a storyboard-based application, you will often want to do a little preparation before navigation
-     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-     // Get the new view controller using segue.destinationViewController.
-     // Pass the selected object to the new view controller.
-     }
-     */
 }
 
 extension MapViewController {
@@ -152,8 +143,9 @@ extension MapViewController {
                     stack.context.delete(pin)
                     mapView.removeAnnotation(annotation)
                 } else {
-                    let vc = storyboard?.instantiateViewController(withIdentifier: "photosViewController")
-                    navigationController?.pushViewController(vc!, animated: true)
+                    let vc = storyboard?.instantiateViewController(withIdentifier: "photosViewController") as! PhotosViewController
+                    vc.pin = pin as? Pin
+                    navigationController?.pushViewController(vc, animated: true)
                 }
             }
         }

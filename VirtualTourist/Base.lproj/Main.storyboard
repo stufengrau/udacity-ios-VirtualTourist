@@ -77,7 +77,20 @@
                     <view key="view" contentMode="scaleToFill" id="xly-GO-LB7">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" red="0.0" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AuQ-Ru-WIL">
+                                <rect key="frame" x="108" y="318" width="158" height="30"/>
+                                <state key="normal" title="Get Images From Flickr"/>
+                                <connections>
+                                    <action selector="getImagesFromFlickr:" destination="4KS-9V-egX" eventType="touchUpInside" id="2U4-6I-Bqt"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                        <constraints>
+                            <constraint firstItem="AuQ-Ru-WIL" firstAttribute="centerY" secondItem="xly-GO-LB7" secondAttribute="centerY" id="BEG-eo-MzT"/>
+                            <constraint firstItem="AuQ-Ru-WIL" firstAttribute="centerX" secondItem="xly-GO-LB7" secondAttribute="centerX" id="sSw-fg-J3r"/>
+                        </constraints>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="OMj-DD-5wA" userLabel="First Responder" sceneMemberID="firstResponder"/>

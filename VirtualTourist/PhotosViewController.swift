@@ -10,24 +10,27 @@ import UIKit
 import MapKit
 
 class PhotosViewController: UIViewController, MKMapViewDelegate {
-
+    
+    var pin : Pin!
     
     // MARK: View Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
     }
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+    
+    
+    @IBAction func getImagesFromFlickr(_ sender: UIButton) {
+        FlickrAPI.shared.getFlickrImages(forLatitude: pin.latitude, andLongitude: pin.longitude) { (result) in
+            switch(result) {
+            case .success:
+                debugPrint("Retrieving images from flickr: Done.")
+            case .failure:
+                debugPrint("Retrieving images from flickr: Something went wrong.")
+            case .noImagesFound:
+                debugPrint("Sorry, no images found for that location.")
+            }
+        }
     }
-    */
-
+    
 }
