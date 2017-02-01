@@ -14,7 +14,7 @@ public class Photo: NSManagedObject {
     
     // MARK: Initializer
     
-    convenience init(url: String, imageData: NSData, context: NSManagedObjectContext) {
+    convenience init(url: String, imageData: NSData?, context: NSManagedObjectContext) {
         if let ent = NSEntityDescription.entity(forEntityName: "Photo", in: context) {
             self.init(entity: ent, insertInto: context)
             self.url = url
