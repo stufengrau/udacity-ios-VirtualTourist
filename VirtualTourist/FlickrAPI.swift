@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 enum getFlickrImagesResult {
     case success
@@ -19,6 +20,12 @@ class FlickrAPI {
     // MARK: Properties
     
     private var session = URLSession.shared
+    private let photosPerPage = 21
+    
+    var stack: CoreDataStack {
+        let delegate = UIApplication.shared.delegate as! AppDelegate
+        return delegate.stack
+    }
     
     // Singleton
     static let shared = FlickrAPI()
@@ -27,62 +34,116 @@ class FlickrAPI {
     // MARK: Network Requests
     
     // Get images from flickr for a pin
-    func getFlickrImages(forLatitude lat: Double, andLongitude long: Double,
-                         completionHandler: @escaping (getFlickrImagesResult) -> Void) {
+    func getFlickrImages(forPin pin: Pin, completionHandler: @escaping (getFlickrImagesResult) -> Void) {
         
         let methodParameters = [
             FlickrParameterKeys.Method: FlickrParameterValues.SearchMethod,
             FlickrParameterKeys.APIKey: FlickrAPI.FlickrAPIKey.APIKey,
-            FlickrParameterKeys.BoundingBox: self.bboxString(latitude: lat, longitude: long),
+            FlickrParameterKeys.BoundingBox: self.bboxString(latitude: pin.latitude, longitude: pin.longitude),
             FlickrParameterKeys.SafeSearch: FlickrParameterValues.UseSafeSearch,
             FlickrParameterKeys.Extras: FlickrParameterValues.MediumURL,
             FlickrParameterKeys.Format: FlickrParameterValues.ResponseFormat,
-            FlickrParameterKeys.NoJSONCallback: FlickrParameterValues.DisableJSONCallback
+            FlickrParameterKeys.NoJSONCallback: FlickrParameterValues.DisableJSONCallback,
+            FlickrParameterKeys.PerPage: String(photosPerPage)
         ]
         
         let request = NSMutableURLRequest(url: flickrURLFromParameters(methodParameters))
         
         session.dataTask(with: request as URLRequest) { data, response, error in
             
-            guard error == nil else {
+            guard let parsedResult = self.getResult(data: data, response: response, error: error) else {
                 completionHandler(.failure)
                 return
-            }
-            
-            guard let statusCode = (response as? HTTPURLResponse)?.statusCode,
-                statusCode >= 200 && statusCode <= 299 else {
-                    completionHandler(.failure)
-                    return
-            }
-            
-            guard let parsedResult = self.convertData(data) as? [String: AnyObject] else {
-                completionHandler(.failure)
-                return
-            }
-            
-            /* GUARD: Did Flickr return an error (stat != ok)? */
-            guard let stat = parsedResult[FlickrResponseKeys.Status] as? String,
-                stat == FlickrResponseValues.OKStatus else {
-                    completionHandler(.failure)
-                    return
             }
             
             guard let photosDictionary = parsedResult[FlickrResponseKeys.Photos] as? [String:AnyObject],
-                let photosArray = photosDictionary[FlickrResponseKeys.Photo] as? [[String:AnyObject]] else {
+                let totalPages = photosDictionary[FlickrResponseKeys.Pages] as? Int else {
                     completionHandler(.failure)
                     return
             }
             
-            debugPrint(photosArray.first!)
+            debugPrint("totalPages: \(totalPages)")
             
-            completionHandler(.success)
+            // pick a random page!
+            let randomPage = Int(arc4random_uniform(UInt32(totalPages))) + 1
+            debugPrint("Random Page: \(randomPage)")
+            
+            self.getFlickrImagesURL(pin, methodParameters, withPageNumber: randomPage, completionHandler: completionHandler)
+            
             
             }.resume()
         
     }
     
+    private func getFlickrImagesURL(_ pin: Pin, _ methodParameters: [String: String], withPageNumber: Int,
+                                                completionHandler: @escaping (getFlickrImagesResult) -> Void) {
+        
+        // add the page to the method's parameters
+        var methodParametersWithPageNumber = methodParameters
+        methodParametersWithPageNumber[FlickrParameterKeys.Page] = String(withPageNumber)
+        
+        let request = URLRequest(url: flickrURLFromParameters(methodParametersWithPageNumber))
+        
+        session.dataTask(with: request) { (data, response, error) in
+
+            guard let parsedResult = self.getResult(data: data, response: response, error: error) else {
+                completionHandler(.failure)
+                return
+            }
+            
+            guard let photosDictionary = parsedResult[FlickrResponseKeys.Photos] as? [String:AnyObject],
+                let photosArray = photosDictionary[FlickrResponseKeys.Photo] as? [[String: AnyObject]] else {
+                    completionHandler(.failure)
+                    return
+            }
+            
+            if photosArray.count == 0 {
+                completionHandler(.noImagesFound)
+                return
+            } else {
+                
+                self.stack.performBackgroundBatchOperation { (workerContext) in
+                    
+                    for photoDictionary in photosArray {
+                        guard let imageURLString = photoDictionary[FlickrResponseKeys.MediumURL] as? String else {
+                            completionHandler(.failure)
+                            return
+                        }
+                        let photo = Photo(url: imageURLString, imageData: nil, context: self.stack.context)
+                        photo.pin = pin
+                        debugPrint(imageURLString)
+                    }
+                    print("==== finished background operation ====")
+                    completionHandler(.success)
+                }
+            }
+        }.resume()
+        
+    }
+    
     
     // MARK: Helper functions
+    
+    private func getResult(data: Data?, response: URLResponse?, error: Error?) -> [String: AnyObject]? {
+        
+        guard error == nil else {
+            return nil
+        }
+        
+        guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
+            return nil
+        }
+        
+        guard let parsedResult = self.convertData(data) as? [String: AnyObject] else {
+            return nil
+        }
+        
+        guard let stat = parsedResult[FlickrResponseKeys.Status] as? String, stat == FlickrResponseValues.OKStatus else {
+            return nil
+        }
+        
+        return parsedResult
+    }
     
     // Create URL from Parameters
     private func flickrURLFromParameters(_ parameters: [String:String]) -> URL {

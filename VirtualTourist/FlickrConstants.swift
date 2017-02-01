@@ -35,6 +35,7 @@ extension FlickrAPI {
         static let SafeSearch = "safe_search"
         static let BoundingBox = "bbox"
         static let Page = "page"
+        static let PerPage = "per_page"
     }
     
     // MARK: Flickr Parameter Values
