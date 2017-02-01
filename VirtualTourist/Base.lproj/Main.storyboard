@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="NtP-jq-FLv">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="NtP-jq-FLv">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -78,20 +78,77 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AuQ-Ru-WIL">
-                                <rect key="frame" x="108" y="318" width="158" height="30"/>
-                                <state key="normal" title="Get Images From Flickr"/>
-                                <connections>
-                                    <action selector="getImagesFromFlickr:" destination="4KS-9V-egX" eventType="touchUpInside" id="2U4-6I-Bqt"/>
-                                </connections>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="LWx-yc-dTq">
+                                <rect key="frame" x="0.0" y="20" width="375" height="150"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="150" id="7Yo-rW-qXF"/>
+                                </constraints>
+                            </mapView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2fe-6l-Chr">
+                                <rect key="frame" x="0.0" y="627" width="375" height="40"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="40" id="IYG-pa-IyP"/>
+                                </constraints>
+                                <state key="normal" title="New Collection"/>
                             </button>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="dwG-uL-ffO">
+                                <rect key="frame" x="0.0" y="178" width="375" height="449"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="Vpr-cd-qnv">
+                                    <size key="itemSize" width="100" height="100"/>
+                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                </collectionViewFlowLayout>
+                                <cells>
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="photo" id="vfY-1v-x6S" customClass="PhotosCollectionViewCell" customModule="VirtualTourist" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                                            <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="OFu-1P-xTj">
+                                                    <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
+                                                </imageView>
+                                            </subviews>
+                                        </view>
+                                        <constraints>
+                                            <constraint firstAttribute="bottom" secondItem="OFu-1P-xTj" secondAttribute="bottom" id="Ht1-tG-1qZ"/>
+                                            <constraint firstItem="OFu-1P-xTj" firstAttribute="leading" secondItem="vfY-1v-x6S" secondAttribute="leading" id="Qcg-Jd-LFk"/>
+                                            <constraint firstItem="OFu-1P-xTj" firstAttribute="top" secondItem="vfY-1v-x6S" secondAttribute="top" id="Rxh-aS-3W1"/>
+                                            <constraint firstAttribute="trailing" secondItem="OFu-1P-xTj" secondAttribute="trailing" id="i42-zk-hKa"/>
+                                        </constraints>
+                                        <connections>
+                                            <outlet property="photoImageView" destination="OFu-1P-xTj" id="oMC-U5-hc3"/>
+                                        </connections>
+                                    </collectionViewCell>
+                                </cells>
+                                <connections>
+                                    <outlet property="dataSource" destination="4KS-9V-egX" id="dKZ-tr-ewx"/>
+                                    <outlet property="delegate" destination="4KS-9V-egX" id="oSx-Yw-3Er"/>
+                                </connections>
+                            </collectionView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
-                            <constraint firstItem="AuQ-Ru-WIL" firstAttribute="centerY" secondItem="xly-GO-LB7" secondAttribute="centerY" id="BEG-eo-MzT"/>
-                            <constraint firstItem="AuQ-Ru-WIL" firstAttribute="centerX" secondItem="xly-GO-LB7" secondAttribute="centerX" id="sSw-fg-J3r"/>
+                            <constraint firstAttribute="trailing" secondItem="dwG-uL-ffO" secondAttribute="trailing" id="K4y-hr-vAO"/>
+                            <constraint firstItem="5k5-hc-KP2" firstAttribute="top" secondItem="2fe-6l-Chr" secondAttribute="bottom" id="aNw-HH-AHl"/>
+                            <constraint firstItem="LWx-yc-dTq" firstAttribute="top" secondItem="s98-hk-F1w" secondAttribute="bottom" id="bA3-Gz-BYE"/>
+                            <constraint firstItem="LWx-yc-dTq" firstAttribute="leading" secondItem="xly-GO-LB7" secondAttribute="leading" id="dqf-eJ-nmg"/>
+                            <constraint firstItem="dwG-uL-ffO" firstAttribute="top" secondItem="LWx-yc-dTq" secondAttribute="bottom" constant="8" symbolic="YES" id="jBu-Zb-qUL"/>
+                            <constraint firstItem="2fe-6l-Chr" firstAttribute="leading" secondItem="xly-GO-LB7" secondAttribute="leading" id="jgn-Ng-q0s"/>
+                            <constraint firstItem="2fe-6l-Chr" firstAttribute="top" secondItem="dwG-uL-ffO" secondAttribute="bottom" id="kyX-EN-K3S"/>
+                            <constraint firstItem="dwG-uL-ffO" firstAttribute="leading" secondItem="xly-GO-LB7" secondAttribute="leading" id="lkv-53-7Nm"/>
+                            <constraint firstAttribute="trailing" secondItem="2fe-6l-Chr" secondAttribute="trailing" id="noi-Eu-lL5"/>
+                            <constraint firstAttribute="trailing" secondItem="LWx-yc-dTq" secondAttribute="trailing" id="oqw-zG-OS2"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="collectionView" destination="dwG-uL-ffO" id="XMR-AG-rRy"/>
+                        <outlet property="flowLayout" destination="Vpr-cd-qnv" id="V6i-al-OyL"/>
+                        <outlet property="mapView" destination="LWx-yc-dTq" id="H12-aU-x2A"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="OMj-DD-5wA" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
