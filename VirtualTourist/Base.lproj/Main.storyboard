@@ -90,6 +90,9 @@
                                     <constraint firstAttribute="height" constant="40" id="IYG-pa-IyP"/>
                                 </constraints>
                                 <state key="normal" title="New Collection"/>
+                                <connections>
+                                    <action selector="collectionButton:" destination="4KS-9V-egX" eventType="touchUpInside" id="JBb-1L-zEZ"/>
+                                </connections>
                             </button>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="dwG-uL-ffO">
                                 <rect key="frame" x="0.0" y="178" width="375" height="449"/>
@@ -108,18 +111,24 @@
                                             <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="OFu-1P-xTj">
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="OFu-1P-xTj">
                                                     <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                                 </imageView>
+                                                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="gqu-Vc-SXy">
+                                                    <rect key="frame" x="40" y="40" width="20" height="20"/>
+                                                </activityIndicatorView>
                                             </subviews>
                                         </view>
                                         <constraints>
                                             <constraint firstAttribute="bottom" secondItem="OFu-1P-xTj" secondAttribute="bottom" id="Ht1-tG-1qZ"/>
                                             <constraint firstItem="OFu-1P-xTj" firstAttribute="leading" secondItem="vfY-1v-x6S" secondAttribute="leading" id="Qcg-Jd-LFk"/>
                                             <constraint firstItem="OFu-1P-xTj" firstAttribute="top" secondItem="vfY-1v-x6S" secondAttribute="top" id="Rxh-aS-3W1"/>
+                                            <constraint firstItem="gqu-Vc-SXy" firstAttribute="centerY" secondItem="vfY-1v-x6S" secondAttribute="centerY" id="hI3-EU-Xeh"/>
                                             <constraint firstAttribute="trailing" secondItem="OFu-1P-xTj" secondAttribute="trailing" id="i42-zk-hKa"/>
+                                            <constraint firstItem="gqu-Vc-SXy" firstAttribute="centerX" secondItem="vfY-1v-x6S" secondAttribute="centerX" id="su4-Fe-tng"/>
                                         </constraints>
                                         <connections>
+                                            <outlet property="activityIndicatorView" destination="gqu-Vc-SXy" id="gU5-fl-biK"/>
                                             <outlet property="photoImageView" destination="OFu-1P-xTj" id="oMC-U5-hc3"/>
                                         </connections>
                                     </collectionViewCell>
@@ -148,6 +157,7 @@
                         <outlet property="collectionView" destination="dwG-uL-ffO" id="XMR-AG-rRy"/>
                         <outlet property="flowLayout" destination="Vpr-cd-qnv" id="V6i-al-OyL"/>
                         <outlet property="mapView" destination="LWx-yc-dTq" id="H12-aU-x2A"/>
+                        <outlet property="newCollectionButton" destination="2fe-6l-Chr" id="8gF-q0-joa"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="OMj-DD-5wA" userLabel="First Responder" sceneMemberID="firstResponder"/>
