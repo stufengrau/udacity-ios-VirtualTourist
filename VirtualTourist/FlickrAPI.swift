@@ -34,7 +34,7 @@ class FlickrAPI {
     // MARK: Network Requests
     
     // Get images from flickr for a pin
-    func getFlickrImages(forPin pin: Pin, completionHandler: @escaping (getFlickrImagesResult) -> Void) {
+    func getFlickrImagePages(forPin pin: Pin, completionHandler: @escaping (getFlickrImagesResult) -> Void) {
         
         let methodParameters = [
             FlickrParameterKeys.Method: FlickrParameterValues.SearchMethod,
@@ -68,14 +68,14 @@ class FlickrAPI {
             let randomPage = Int(arc4random_uniform(UInt32(totalPages))) + 1
             debugPrint("Random Page: \(randomPage)")
             
-            self.getFlickrImagesURL(pin, methodParameters, withPageNumber: randomPage, completionHandler: completionHandler)
+            self.getFlickrImageURLs(pin, methodParameters, withPageNumber: randomPage, completionHandler: completionHandler)
             
             
             }.resume()
         
     }
     
-    private func getFlickrImagesURL(_ pin: Pin, _ methodParameters: [String: String], withPageNumber: Int,
+    private func getFlickrImageURLs(_ pin: Pin, _ methodParameters: [String: String], withPageNumber: Int,
                                                 completionHandler: @escaping (getFlickrImagesResult) -> Void) {
         
         // add the page to the method's parameters
@@ -118,6 +118,17 @@ class FlickrAPI {
                 }
             }
         }.resume()
+        
+    }
+    
+    func getFlickrImage(for photo: Photo) {
+        
+        let imageURL = URL(string: photo.url!)
+
+        session.dataTask(with: imageURL!) {_,_,_ in 
+            photo.image = try? Data(contentsOf: imageURL!)
+        }.resume()
+        
         
     }
     
