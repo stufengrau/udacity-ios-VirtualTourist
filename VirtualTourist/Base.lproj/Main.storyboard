@@ -138,19 +138,28 @@
                                     <outlet property="delegate" destination="4KS-9V-egX" id="oSx-Yw-3Er"/>
                                 </connections>
                             </collectionView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="This pin has no images." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zE6-c4-c28">
+                                <rect key="frame" x="0.0" y="270" width="375" height="20.5"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="dwG-uL-ffO" secondAttribute="trailing" id="K4y-hr-vAO"/>
                             <constraint firstItem="5k5-hc-KP2" firstAttribute="top" secondItem="2fe-6l-Chr" secondAttribute="bottom" id="aNw-HH-AHl"/>
                             <constraint firstItem="LWx-yc-dTq" firstAttribute="top" secondItem="s98-hk-F1w" secondAttribute="bottom" id="bA3-Gz-BYE"/>
+                            <constraint firstItem="zE6-c4-c28" firstAttribute="top" secondItem="LWx-yc-dTq" secondAttribute="bottom" constant="100" id="bZa-GW-778"/>
                             <constraint firstItem="LWx-yc-dTq" firstAttribute="leading" secondItem="xly-GO-LB7" secondAttribute="leading" id="dqf-eJ-nmg"/>
+                            <constraint firstItem="zE6-c4-c28" firstAttribute="leading" secondItem="xly-GO-LB7" secondAttribute="leading" id="if4-cr-ODO"/>
                             <constraint firstItem="dwG-uL-ffO" firstAttribute="top" secondItem="LWx-yc-dTq" secondAttribute="bottom" constant="8" symbolic="YES" id="jBu-Zb-qUL"/>
                             <constraint firstItem="2fe-6l-Chr" firstAttribute="leading" secondItem="xly-GO-LB7" secondAttribute="leading" id="jgn-Ng-q0s"/>
                             <constraint firstItem="2fe-6l-Chr" firstAttribute="top" secondItem="dwG-uL-ffO" secondAttribute="bottom" id="kyX-EN-K3S"/>
                             <constraint firstItem="dwG-uL-ffO" firstAttribute="leading" secondItem="xly-GO-LB7" secondAttribute="leading" id="lkv-53-7Nm"/>
                             <constraint firstAttribute="trailing" secondItem="2fe-6l-Chr" secondAttribute="trailing" id="noi-Eu-lL5"/>
                             <constraint firstAttribute="trailing" secondItem="LWx-yc-dTq" secondAttribute="trailing" id="oqw-zG-OS2"/>
+                            <constraint firstAttribute="trailing" secondItem="zE6-c4-c28" secondAttribute="trailing" id="rKE-mh-qML"/>
                         </constraints>
                     </view>
                     <connections>
@@ -158,6 +167,7 @@
                         <outlet property="flowLayout" destination="Vpr-cd-qnv" id="V6i-al-OyL"/>
                         <outlet property="mapView" destination="LWx-yc-dTq" id="H12-aU-x2A"/>
                         <outlet property="newCollectionButton" destination="2fe-6l-Chr" id="8gF-q0-joa"/>
+                        <outlet property="noImagesFoundLabel" destination="zE6-c4-c28" id="VCs-g0-Lxc"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="OMj-DD-5wA" userLabel="First Responder" sceneMemberID="firstResponder"/>

@@ -22,6 +22,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
     @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var newCollectionButton: UIButton!
+    @IBOutlet weak var noImagesFoundLabel: UILabel!
     
     var editMode: Bool! {
         didSet {
@@ -72,6 +73,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
         setGridLayout(view.frame.size)
         
         newCollectionButton.isEnabled = false
+        noImagesFoundLabel.isHidden = true
         collectionView.allowsMultipleSelection = true
         editMode = false
         
@@ -122,11 +124,17 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
             switch(result) {
             case .success:
                 debugPrint("Retrieving images from flickr: Done.")
+                DispatchQueue.main.async {
+                    self.noImagesFoundLabel.isHidden = true
+                    //self.collectionView.isHidden = false
+                }
             case .failure:
                 debugPrint("Retrieving images from flickr: Something went wrong.")
             case .noImagesFound:
                 debugPrint("Sorry, no images found for that location.")
                 DispatchQueue.main.async {
+                    //self.collectionView.isHidden = true
+                    self.noImagesFoundLabel.isHidden = false
                     self.newCollectionButton.isEnabled = true
                 }
             }
