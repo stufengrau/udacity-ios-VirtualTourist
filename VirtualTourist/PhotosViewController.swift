@@ -16,7 +16,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
     var insertPhotosAtIndexes: [IndexPath]!
     var deletePhotosAtIndexes: [IndexPath]!
     var selectedPhotos: [IndexPath]!
-    var pin : Pin!
+    var pin: Pin!
     
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
@@ -95,12 +95,10 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
     @IBAction func collectionButton(_ sender: UIButton) {
 
         if editMode! {
-            
             for photoIndex in selectedPhotos {
                 let photo = fetchedResultsController?.object(at: photoIndex) as! Photo
                 stack.context.delete(photo)
             }
-            
             editMode = false
         } else {
             
@@ -177,23 +175,11 @@ extension PhotosViewController: UICollectionViewDataSource, UICollectionViewDele
         // get a reference to our storyboard cell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath as IndexPath) as! PhotosCollectionViewCell
         
-        cell.activityIndicatorView.hidesWhenStopped = true
+        cell.configureCell(image: photo.image)
         
-
-        if cell.isSelected {
-            cell.photoImageView.alpha = 0.3
-        } else {
-            cell.photoImageView.alpha = 1.0
-        }
-        
-        if let imageData = photo.image {
+        if (photo.image != nil) {
             newCollectionButton.isEnabled = true
-            cell.activityIndicatorView.stopAnimating()
-            cell.photoImageView.image = UIImage(data: imageData)
         } else {
-            cell.photoImageView.image = nil
-            cell.backgroundColor = UIColor.gray
-            cell.activityIndicatorView.startAnimating()
             FlickrAPI.shared.getFlickrImage(for: photo)
         }
         
@@ -202,14 +188,14 @@ extension PhotosViewController: UICollectionViewDataSource, UICollectionViewDele
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let cell = collectionView.cellForItem(at: indexPath) as! PhotosCollectionViewCell
-        cell.photoImageView.alpha = 0.3
+        cell.imageSelected = true
         selectedPhotos.append(indexPath)
         editMode = true
     }
     
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         let cell = collectionView.cellForItem(at: indexPath) as! PhotosCollectionViewCell
-        cell.photoImageView.alpha = 1.0
+        cell.imageSelected = false
         if let index = selectedPhotos.index(of: indexPath) {
             selectedPhotos.remove(at: index)
         }
@@ -241,7 +227,6 @@ extension PhotosViewController: NSFetchedResultsControllerDelegate {
     }
     
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        debugPrint("did change content")
         if insertPhotosAtIndexes.count > 0 {
             collectionView.insertItems(at: insertPhotosAtIndexes)
         }
