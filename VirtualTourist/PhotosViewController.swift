@@ -195,15 +195,11 @@ extension PhotosViewController: UICollectionViewDataSource, UICollectionViewDele
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let cell = collectionView.cellForItem(at: indexPath) as! PhotosCollectionViewCell
-        cell.imageSelected = true
         selectedPhotos.append(indexPath)
         editMode = true
     }
     
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        let cell = collectionView.cellForItem(at: indexPath) as! PhotosCollectionViewCell
-        cell.imageSelected = false
         if let index = selectedPhotos.index(of: indexPath) {
             selectedPhotos.remove(at: index)
         }
