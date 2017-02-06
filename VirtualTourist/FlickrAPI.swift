@@ -119,25 +119,26 @@ class FlickrAPI {
         
     }
     
-    // TODO:
     func getFlickrImage(for url: String) {
         
         let imageURL = URL(string: url)
 
-        session.dataTask(with: imageURL!) {data, _,_ in
-            // TODO:
+        session.dataTask(with: imageURL!) {data, _, _ in
+            
+            guard let data = data else {
+                return
+            }
+            
             self.stack.performBackgroundBatchOperation { (workerContext) in
                 let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Photo")
                 fetchRequest.predicate = NSPredicate(format: "url = %@", argumentArray: [url])
-                // TODO:
-                let photos = try! workerContext.fetch(fetchRequest) as! [Photo]
-                for photo in photos {
-                    photo.image = data
+                if let photos = try? workerContext.fetch(fetchRequest) as! [Photo] {
+                    for photo in photos {
+                        photo.image = data
+                    }
                 }
-
             }
         }.resume()
-        
         
     }
     
