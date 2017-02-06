@@ -44,8 +44,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
     
     var fetchedResultsController : NSFetchedResultsController<NSFetchRequestResult>? {
         didSet {
-            // Whenever the frc changes, we execute the search and
-            // reload the data
+            // Whenever the frc changes, we execute the search and reload the data
             fetchedResultsController?.delegate = self
             executeSearch()
             collectionView.reloadData()
@@ -54,11 +53,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
     
     func executeSearch() {
         if let fc = fetchedResultsController {
-            do {
-                try fc.performFetch()
-            } catch let e as NSError {
-                print("Error while trying to perform a search: \n\(e)\n\(fetchedResultsController)")
-            }
+            try? fc.performFetch()
         }
     }
 
@@ -88,11 +83,10 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        debugPrint("View will appear")
-        // TODO:
-        let fr = try? stack.backgroundContext.fetch(fetchRequest) as! [Photo]
-        if fr?.count == 0 {
-            getFlickrImagePages()
+        if let fetchResult = try? stack.backgroundContext.fetch(fetchRequest) as! [Photo] {
+            if fetchResult.count == 0 {
+                getFlickrImagePages()
+            }
         }
     }
     
@@ -184,27 +178,28 @@ extension PhotosViewController: UICollectionViewDataSource, UICollectionViewDele
     
     // tell the collection view how many cells to make
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        //guard let fc = fetchedResultsController else { return 0 }
-        let fr = try? stack.backgroundContext.fetch(fetchRequest) as! [Photo]
-        return fr?.count ?? 0
+        guard let fetchResult = try? stack.backgroundContext.fetch(fetchRequest) as! [Photo] else { return 0 }
+        return fetchResult.count
     }
     
     // make a cell for each cell index path
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        // Get the photo
-        let photos = try? stack.backgroundContext.fetch(fetchRequest) as! [Photo]
-        let photo = photos![indexPath.row]
-        
         // get a reference to our storyboard cell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath as IndexPath) as! PhotosCollectionViewCell
         
-        cell.configureCell(image: photo.image)
+        // Get the photo
+        guard let photos = try? stack.backgroundContext.fetch(fetchRequest) as! [Photo] else { return cell }
+        let photo = photos[indexPath.row]
         
-        if (photo.image != nil) {
-            newCollectionButton.isEnabled = true
+        cell.configureCell(image: photo.image)
+
+        if photo.image == nil {
+            if let url = photo.url {
+                FlickrAPI.shared.getFlickrImage(for: url)
+            }
         } else {
-            FlickrAPI.shared.getFlickrImage(for: photo.url!)
+            newCollectionButton.isEnabled = true
         }
         
         return cell
