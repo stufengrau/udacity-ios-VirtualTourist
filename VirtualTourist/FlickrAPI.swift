@@ -34,8 +34,8 @@ class FlickrAPI {
     
     // MARK: Network Requests
     
-    // Get images from flickr for a pin
-    func getFlickrImagePages(forPin pin: Pin, completionHandler: @escaping (getFlickrImagesResult) -> Void) {
+    // Get number of result pages from flickr for a pin
+    func getFlickrImagePages(for pin: Pin, completionHandler: @escaping (getFlickrImagesResult) -> Void) {
         
         let methodParameters = [
             FlickrParameterKeys.Method: FlickrParameterValues.SearchMethod,
@@ -69,12 +69,14 @@ class FlickrAPI {
             let randomPage = Int(arc4random_uniform(UInt32(totalPages))) + 1
             debugPrint("Random Page: \(randomPage)")
             
+            // Get image URLs from Flickr for a random page
             self.getFlickrImageURLs(pin, methodParameters, withPageNumber: randomPage, completionHandler: completionHandler)
             
             }.resume()
         
     }
     
+    // Get image URLs from Flickr for a specified page
     private func getFlickrImageURLs(_ pin: Pin, _ methodParameters: [String: String], withPageNumber: Int,
                                                 completionHandler: @escaping (getFlickrImagesResult) -> Void) {
         
@@ -97,13 +99,15 @@ class FlickrAPI {
                     return
             }
             
+            // Images found for location?
             if photosArray.count == 0 {
                 completionHandler(.noImagesFound)
                 return
             } else {
                 
                 self.stack.performBackgroundBatchOperation { (workerContext) in
-                    
+                    // Create photo objects for each image in the flickr result
+                    // Save the image url and link the photos to the pin
                     for photoDictionary in photosArray {
                         guard let imageURLString = photoDictionary[FlickrResponseKeys.MediumURL] as? String else {
                             completionHandler(.failure)
@@ -119,6 +123,7 @@ class FlickrAPI {
         
     }
     
+    // Get the image data for a specified URL
     func getFlickrImage(for url: String) {
         
         let imageURL = URL(string: url)
@@ -130,6 +135,11 @@ class FlickrAPI {
             }
             
             self.stack.performBackgroundBatchOperation { (workerContext) in
+                // First the photo object itself was a parameter of the getFlickrImage method
+                // but the lifetime of the object was to long and caused site effects
+                // Therefore directly fetch the photo object for the specified URL 
+                // If pins are close enough to each other, their search radius can overlap and a
+                // URL might not be unique, so the image data for all returned photo objects is set
                 let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Photo")
                 fetchRequest.predicate = NSPredicate(format: "url = %@", argumentArray: [url])
                 if let photos = try? workerContext.fetch(fetchRequest) as! [Photo] {
@@ -145,6 +155,7 @@ class FlickrAPI {
     
     // MARK: Helper functions
     
+    // Return the parsed Result if no errors occured
     private func getResult(data: Data?, response: URLResponse?, error: Error?) -> [String: AnyObject]? {
         
         guard error == nil else {
@@ -166,7 +177,7 @@ class FlickrAPI {
         return parsedResult
     }
     
-    // Create URL from Parameters
+    // Create Flickr URL from Parameters
     private func flickrURLFromParameters(_ parameters: [String:String]) -> URL {
         
         var components = URLComponents()

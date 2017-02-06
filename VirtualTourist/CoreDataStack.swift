@@ -4,7 +4,9 @@
 //  Created by Fernando Rodríguez Romero on 21/02/16.
 //  Copyright © 2016 udacity.com. All rights reserved.
 //
+// ***************************************************
 //  This file is from the Udacity iOS Core Data Course
+// ***************************************************
 
 import CoreData
 

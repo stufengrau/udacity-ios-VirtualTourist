@@ -11,14 +11,18 @@ import MapKit
 
 class DefaultStore {
     
+    // MARK: Properties
+    
     private let regionLatitudeKey = "regionLatitude"
     private let regionLongitudeKey = "regionLongitude"
     private let spanLatitudeDeltaKey = "spanLatitudeDelta"
     private let spanLongitudeDeltaKey = "spanLongitudeDelta"
     private let regionIsSetKey = "regionIsSet"
     
+    // Persist the last map region and span in UserDefaults
     var region: MKCoordinateRegion? {
         get {
+            // Check if map region/span is set yet
             if UserDefaults.standard.bool(forKey: regionIsSetKey) {
                 return MKCoordinateRegion(
                     center: CLLocationCoordinate2D(
@@ -46,8 +50,8 @@ class DefaultStore {
         }
     }
     
+    // Singelton
     static let shared = DefaultStore()
-    
     private init() {}
     
     

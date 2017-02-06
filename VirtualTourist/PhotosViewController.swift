@@ -12,6 +12,9 @@ import CoreData
 
 class PhotosViewController: UIViewController, MKMapViewDelegate  {
     
+    
+    // MARK: Properties
+    
     let reuseIdentifier = "photo"
     var insertPhotosAtIndexes: [IndexPath]!
     var deletePhotosAtIndexes: [IndexPath]!
@@ -24,6 +27,8 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
     @IBOutlet weak var newCollectionButton: UIButton!
     @IBOutlet weak var noImagesFoundLabel: UILabel!
     
+    // Edit Mode to delete selected pins
+    // or renew entire collection
     var editMode: Bool! {
         didSet {
             if editMode! {
@@ -63,6 +68,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // Setup map view with pin
         let annotation = MKPointAnnotation()
         annotation.coordinate = CLLocationCoordinate2DMake(pin.latitude, pin.longitude)
         mapView.addAnnotation(annotation)
@@ -75,14 +81,17 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
         
         setGridLayout(view.frame.size)
         
+        // Fetch request for all photos for a specific pin
         fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Photo")
         fetchRequest.predicate = NSPredicate(format: "pin = %@", argumentArray: [pin!])
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "url", ascending: true)]
         
+        // Fetched Results Controller in main context to notify about changes to core data objects
         fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: stack.context, sectionNameKeyPath: nil, cacheName: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        // If pin has no images yet, get URLs from Flickr
         if let fetchResult = try? stack.backgroundContext.fetch(fetchRequest) as! [Photo] {
             if fetchResult.count == 0 {
                 getFlickrImagePages()
@@ -90,9 +99,13 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
         }
     }
     
+    // MARK: IBActions
+    
+    // Button to delete selected pins or renew entire collection
     @IBAction func collectionButton(_ sender: UIButton) {
 
         if editMode! {
+            // Delete selected photos
             let photosToDelete = selectedPhotos
             self.stack.performBackgroundBatchOperation { (workerContext) in
                 if let photos = try? workerContext.fetch(self.fetchRequest) as! [Photo] {
@@ -105,7 +118,8 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
         } else {
             
             newCollectionButton.isEnabled = false
-        
+            
+            // Delete photos of previous collection
             self.stack.performBackgroundBatchOperation { (workerContext) in
                 if let allPhotosForPin = try? workerContext.fetch(self.fetchRequest) as! [NSManagedObject] {
                     for photo in allPhotosForPin {
@@ -114,6 +128,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
                 }
             }
             
+            // Get URLs for new collection
             getFlickrImagePages()
         }
     }
@@ -121,6 +136,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
 
     // MARK: Helper
     
+    // Try to get URLs for a new collection of photos for specified pin
     private func getFlickrImagePages () {
         FlickrAPI.shared.getFlickrImagePages(for: pin) { (result) in
             switch(result) {
@@ -142,6 +158,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
         }
     }
     
+    // Display an alert message
     private func showAlert(_ errormessage: String) {
             let alertController = UIAlertController(title: "", message: errormessage, preferredStyle: .alert)
             let dismissAction = UIAlertAction(title: "Dismiss", style: .cancel, handler: nil)
@@ -149,6 +166,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
             self.present(alertController, animated: true, completion: nil)
     }
 
+    // Set Flow layout for collection view
     private func setGridLayout(_ size: CGSize) {
         
         let spacing: CGFloat = 3.0
@@ -174,46 +192,52 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
 
 extension PhotosViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     
-    // MARK: - UICollectionViewDataSource protocol
+    // MARK: UICollectionViewDataSource protocol
     
-    // tell the collection view how many cells to make
+    // Tell the collection view how many cells to make
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         guard let fetchResult = try? stack.backgroundContext.fetch(fetchRequest) as! [Photo] else { return 0 }
         return fetchResult.count
     }
     
-    // make a cell for each cell index path
+    // Make a cell
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        // get a reference to our storyboard cell
+        // get a reference to the storyboard cell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath as IndexPath) as! PhotosCollectionViewCell
         
-        // Get the photo
+        // Get the photo object
         guard let photos = try? stack.backgroundContext.fetch(fetchRequest) as! [Photo] else { return cell }
         let photo = photos[indexPath.row]
         
         cell.configureCell(image: photo.image)
 
+        // If there is no image data yet, get the Image
         if photo.image == nil {
             if let url = photo.url {
                 FlickrAPI.shared.getFlickrImage(for: url)
             }
         } else {
+            // Since the images are only loaded for the visible cells
+            // the newCollectionButton is enabled as soon as one image has loaded
             newCollectionButton.isEnabled = true
         }
         
         return cell
     }
     
+    // Select an image
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         selectedPhotos.append(indexPath)
         editMode = true
     }
     
+    // Deselect an image
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         if let index = selectedPhotos.index(of: indexPath) {
             selectedPhotos.remove(at: index)
         }
+        // If no more photo is selected, editMode is false -> nothing to delete
         if selectedPhotos.count == 0 {
             editMode = false
         }
@@ -223,16 +247,22 @@ extension PhotosViewController: UICollectionViewDataSource, UICollectionViewDele
 
 extension PhotosViewController: NSFetchedResultsControllerDelegate {
     
+    // MARK: NSFetchedResultsControllerDelegate protocol
+    
+    // Core Data Object will change content
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         insertPhotosAtIndexes = [IndexPath]()
         deletePhotosAtIndexes = [IndexPath]()
     }
     
+    // Notification about changes to core data objects
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         switch(type) {
         case .insert:
+            // Memorize photos to insert
             insertPhotosAtIndexes.append(newIndexPath!)
         case .delete:
+            // Memorize photos to delete
             deletePhotosAtIndexes.append(indexPath!)
         case .update:
             collectionView.reloadItems(at: [indexPath!])
@@ -241,10 +271,15 @@ extension PhotosViewController: NSFetchedResultsControllerDelegate {
         }
     }
     
+    // Core Data Object did change content
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        // Bulk insert
+        // otherwise there will be a conflict with the number of objects in the collection view section
         if insertPhotosAtIndexes.count > 0 {
             collectionView.insertItems(at: insertPhotosAtIndexes)
         }
+        // Bulk delete
+        // otherwise there will be a conflict with the number of objects in the collection view section
         if deletePhotosAtIndexes.count > 0 {
             collectionView.deleteItems(at: deletePhotosAtIndexes)
         }

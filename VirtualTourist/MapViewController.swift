@@ -25,6 +25,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         return delegate.stack
     }
     
+    // Edit mode to delete pins
     var editMode: Bool! {
         didSet {
             if editMode! {
@@ -52,7 +53,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         mapView.delegate = self
         
-        // if the map region was saved before, set it to last values
+        // Set the Map region and span values to last state
         if let region = DefaultStore.shared.region {
             mapView.region = region
         }
@@ -66,6 +67,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
+    // MARK: IBActions
+    
+    // Add annotation if long pressed on the map
     @IBAction func tappedOnMap(_ sender: UILongPressGestureRecognizer) {
         if sender.state == UIGestureRecognizerState.began {
             
@@ -77,16 +81,15 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             let annotation = MKPointAnnotation()
             annotation.coordinate = coordinate
             
-            // save the pin in core data and add annotation to the map
+            // Save the pin in core data and add annotation to the map
             self.stack.performBackgroundBatchOperation { (workerContext) in
                 _ = Pin(latitude: coordinate.latitude, longitude: coordinate.longitude, context: workerContext)
             }
-
             mapView.addAnnotation(annotation)
         }
     }
     
-    // enable/disable edit mode to delete pins
+    // Enable / disable edit mode to delete / add pins
     func toggleEditMode(_ sender: UIBarButtonItem) {
         editMode = !editMode
     }
@@ -114,6 +117,11 @@ extension MapViewController {
         return pinView
     }
     
+    // Save region of the mapView when region changed
+    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        DefaultStore.shared.region = mapView.region
+    }
+    
     // If a pin is tapped, show the photosViewController
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         
@@ -139,6 +147,8 @@ extension MapViewController {
                                          coordinate.longitude - epsilon, coordinate.longitude + epsilon)
         fetchRequest.predicate = fetchPredicate
         
+        // Delete pin from map and core data if in edit mode
+        // else transition to the photos view controller
         if let pins = try? stack.backgroundContext.fetch(fetchRequest) as! [NSManagedObject] {
             if let pin = pins.first {
                 if editMode! {
@@ -151,11 +161,6 @@ extension MapViewController {
                 }
             }
         }
-    }
-    
-    // Save region of the mapView when region changed
-    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        DefaultStore.shared.region = mapView.region
     }
     
 }

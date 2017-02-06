@@ -10,6 +10,8 @@ import UIKit
 
 class PhotosCollectionViewCell: UICollectionViewCell {
     
+    // MARK: Properties
+    
     @IBOutlet weak var photoImageView: UIImageView!
     @IBOutlet weak var activityIndicatorView: UIActivityIndicatorView!
     
@@ -18,9 +20,12 @@ class PhotosCollectionViewCell: UICollectionViewCell {
             alpha = isSelected ? 0.5 : 1.0
         }
     }
+    
+    // MARK: Cell Configuration
 
     func configureCell(image: Data?) {
         
+        // If there is no image data yet, start an animation
         if let imageData = image {
             activityIndicatorView.stopAnimating()
             photoImageView.image = UIImage(data: imageData)

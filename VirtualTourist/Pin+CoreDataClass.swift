@@ -25,6 +25,8 @@ public class Pin: NSManagedObject {
         }
     }
     
+    // MARK: Make Annotation Object
+    
     func makeAnnotation() -> MKAnnotation {
         let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
         let annotation = MKPointAnnotation()
