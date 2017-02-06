@@ -128,7 +128,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
     // MARK: Helper
     
     private func getFlickrImagePages () {
-        FlickrAPI.shared.getFlickrImagePages(forPin: pin) { (result) in
+        FlickrAPI.shared.getFlickrImagePages(for: pin) { (result) in
             switch(result) {
             case .success:
                 DispatchQueue.main.async {
@@ -136,8 +136,8 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
                 }
             case .failure:
                 DispatchQueue.main.async {
-                    // TODO: Alert
-                    debugPrint("Flickr request failure")
+                    self.showAlert("Network failure. Please try again later.")
+                    self.newCollectionButton.isEnabled = true
                 }
             case .noImagesFound:
                 DispatchQueue.main.async {
@@ -146,6 +146,13 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
                 }
             }
         }
+    }
+    
+    private func showAlert(_ errormessage: String) {
+            let alertController = UIAlertController(title: "", message: errormessage, preferredStyle: .alert)
+            let dismissAction = UIAlertAction(title: "Dismiss", style: .cancel, handler: nil)
+            alertController.addAction(dismissAction)
+            self.present(alertController, animated: true, completion: nil)
     }
 
     private func setGridLayout(_ size: CGSize) {
