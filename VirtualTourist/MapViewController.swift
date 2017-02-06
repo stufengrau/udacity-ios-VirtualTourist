@@ -78,7 +78,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             annotation.coordinate = coordinate
             
             // save the pin in core data and add annotation to the map
-            _ = Pin(latitude: coordinate.latitude, longitude: coordinate.longitude, context: stack.context)
+            self.stack.performBackgroundBatchOperation { (workerContext) in
+                _ = Pin(latitude: coordinate.latitude, longitude: coordinate.longitude, context: workerContext)
+            }
+
             mapView.addAnnotation(annotation)
         }
     }
@@ -124,6 +127,7 @@ extension MapViewController {
         mapView.deselectAnnotation(annotation, animated: false)
         
         // Try to get the correct core data object for the tapped annotation
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Pin")
         
         // Direct comparison of Double Values is not a good idea and even not working
         // So to find the corresponding object search in a small range of values
@@ -133,14 +137,12 @@ extension MapViewController {
         let fetchPredicate = NSPredicate(format: "latitude > %lf AND latitude < %lf AND longitude > %lf AND longitude < %lf",
                                          coordinate.latitude - epsilon,  coordinate.latitude + epsilon,
                                          coordinate.longitude - epsilon, coordinate.longitude + epsilon)
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Pin")
         fetchRequest.predicate = fetchPredicate
         
-        // TODO: Work in progress ... eventually refactor this
-        if let pins = try? stack.context.fetch(fetchRequest) as! [NSManagedObject] {
+        if let pins = try? stack.backgroundContext.fetch(fetchRequest) as! [NSManagedObject] {
             if let pin = pins.first {
                 if editMode! {
-                    stack.context.delete(pin)
+                    self.stack.performBackgroundBatchOperation { $0.delete(pin) }
                     mapView.removeAnnotation(annotation)
                 } else {
                     let vc = storyboard?.instantiateViewController(withIdentifier: "photosViewController") as! PhotosViewController

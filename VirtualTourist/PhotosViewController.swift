@@ -40,6 +40,8 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
         return delegate.stack
     }
     
+    var fetchRequest: NSFetchRequest<NSFetchRequestResult>!
+    
     var fetchedResultsController : NSFetchedResultsController<NSFetchRequestResult>? {
         didSet {
             // Whenever the frc changes, we execute the search and
@@ -59,6 +61,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
             }
         }
     }
+
     
     // MARK: View Lifecycle
     
@@ -69,27 +72,26 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
         annotation.coordinate = CLLocationCoordinate2DMake(pin.latitude, pin.longitude)
         mapView.addAnnotation(annotation)
         mapView.region = MKCoordinateRegion(center: annotation.coordinate, span: MKCoordinateSpanMake(0.05, 0.05))
-        
-        setGridLayout(view.frame.size)
-        
+
         newCollectionButton.isEnabled = false
         noImagesFoundLabel.isHidden = true
         collectionView.allowsMultipleSelection = true
         editMode = false
         
-        // Create a fetchrequest
-        let fr = NSFetchRequest<NSFetchRequestResult>(entityName: "Photo")
-        let pred = NSPredicate(format: "pin = %@", argumentArray: [pin!])
-        fr.predicate = pred
+        setGridLayout(view.frame.size)
         
-        fr.sortDescriptors = [NSSortDescriptor(key: "url", ascending: true)]
+        fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Photo")
+        fetchRequest.predicate = NSPredicate(format: "pin = %@", argumentArray: [pin!])
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "url", ascending: true)]
         
-        // Create the FetchedResultsController
-        fetchedResultsController = NSFetchedResultsController(fetchRequest: fr, managedObjectContext: stack.context, sectionNameKeyPath: nil, cacheName: nil)
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: stack.context, sectionNameKeyPath: nil, cacheName: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        if fetchedResultsController!.sections![0].numberOfObjects == 0 {
+        debugPrint("View will appear")
+        // TODO:
+        let fr = try? stack.backgroundContext.fetch(fetchRequest) as! [Photo]
+        if fr?.count == 0 {
             getFlickrImagePages()
         }
     }
@@ -97,18 +99,24 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
     @IBAction func collectionButton(_ sender: UIButton) {
 
         if editMode! {
-            for photoIndex in selectedPhotos {
-                let photo = fetchedResultsController?.object(at: photoIndex) as! Photo
-                stack.context.delete(photo)
+            let photosToDelete = selectedPhotos
+            self.stack.performBackgroundBatchOperation { (workerContext) in
+                if let photos = try? workerContext.fetch(self.fetchRequest) as! [Photo] {
+                    for photoIndex in photosToDelete! {
+                        workerContext.delete(photos[photoIndex.row])
+                    }
+                }
             }
             editMode = false
         } else {
             
             newCollectionButton.isEnabled = false
-            
-            if let allPhotosForPin = fetchedResultsController?.fetchedObjects {
-                for photo in allPhotosForPin {
-                    stack.context.delete(photo as! NSManagedObject)
+        
+            self.stack.performBackgroundBatchOperation { (workerContext) in
+                if let allPhotosForPin = try? workerContext.fetch(self.fetchRequest) as! [NSManagedObject] {
+                    for photo in allPhotosForPin {
+                        workerContext.delete(photo)
+                    }
                 }
             }
             
@@ -123,17 +131,16 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
         FlickrAPI.shared.getFlickrImagePages(forPin: pin) { (result) in
             switch(result) {
             case .success:
-                debugPrint("Retrieving images from flickr: Done.")
                 DispatchQueue.main.async {
                     self.noImagesFoundLabel.isHidden = true
-                    //self.collectionView.isHidden = false
                 }
             case .failure:
-                debugPrint("Retrieving images from flickr: Something went wrong.")
-            case .noImagesFound:
-                debugPrint("Sorry, no images found for that location.")
                 DispatchQueue.main.async {
-                    //self.collectionView.isHidden = true
+                    // TODO: Alert
+                    debugPrint("Flickr request failure")
+                }
+            case .noImagesFound:
+                DispatchQueue.main.async {
                     self.noImagesFoundLabel.isHidden = false
                     self.newCollectionButton.isEnabled = true
                 }
@@ -170,15 +177,17 @@ extension PhotosViewController: UICollectionViewDataSource, UICollectionViewDele
     
     // tell the collection view how many cells to make
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        guard let fc = fetchedResultsController else { return 0 }
-        return fc.sections![section].numberOfObjects
+        //guard let fc = fetchedResultsController else { return 0 }
+        let fr = try? stack.backgroundContext.fetch(fetchRequest) as! [Photo]
+        return fr?.count ?? 0
     }
     
     // make a cell for each cell index path
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         // Get the photo
-        let photo = fetchedResultsController?.object(at: indexPath) as! Photo
+        let photos = try? stack.backgroundContext.fetch(fetchRequest) as! [Photo]
+        let photo = photos![indexPath.row]
         
         // get a reference to our storyboard cell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath as IndexPath) as! PhotosCollectionViewCell
@@ -188,7 +197,7 @@ extension PhotosViewController: UICollectionViewDataSource, UICollectionViewDele
         if (photo.image != nil) {
             newCollectionButton.isEnabled = true
         } else {
-            FlickrAPI.shared.getFlickrImage(for: photo)
+            FlickrAPI.shared.getFlickrImage(for: photo.url!)
         }
         
         return cell

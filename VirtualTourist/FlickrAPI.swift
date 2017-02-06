@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import CoreData
 
 enum getFlickrImagesResult {
     case success
@@ -70,7 +71,6 @@ class FlickrAPI {
             
             self.getFlickrImageURLs(pin, methodParameters, withPageNumber: randomPage, completionHandler: completionHandler)
             
-            
             }.resume()
         
     }
@@ -109,11 +109,9 @@ class FlickrAPI {
                             completionHandler(.failure)
                             return
                         }
-                        let photo = Photo(url: imageURLString, imageData: nil, context: self.stack.context)
+                        let photo = Photo(url: imageURLString, imageData: nil, context: workerContext)
                         photo.pin = pin
-                        debugPrint(imageURLString)
                     }
-                    print("==== finished background operation ====")
                     completionHandler(.success)
                 }
             }
@@ -121,12 +119,23 @@ class FlickrAPI {
         
     }
     
-    func getFlickrImage(for photo: Photo) {
+    // TODO:
+    func getFlickrImage(for url: String) {
         
-        let imageURL = URL(string: photo.url!)
+        let imageURL = URL(string: url)
 
-        session.dataTask(with: imageURL!) {_,_,_ in 
-            photo.image = try? Data(contentsOf: imageURL!)
+        session.dataTask(with: imageURL!) {data, _,_ in
+            // TODO:
+            self.stack.performBackgroundBatchOperation { (workerContext) in
+                let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Photo")
+                fetchRequest.predicate = NSPredicate(format: "url = %@", argumentArray: [url])
+                // TODO:
+                let photos = try! workerContext.fetch(fetchRequest) as! [Photo]
+                for photo in photos {
+                    photo.image = data
+                }
+
+            }
         }.resume()
         
         
