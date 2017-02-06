@@ -19,8 +19,9 @@ extension FlickrAPI {
     
     // MARK: BBox Constants
     struct BBox {
-        static let SearchBBoxHalfWidth = 0.02
-        static let SearchBBoxHalfHeight = 0.02
+        // search in a radius of approximately 10 to 11 kilometers
+        static let SearchBBoxHalfWidth = 0.05
+        static let SearchBBoxHalfHeight = 0.05
         static let SearchLatRange = (-90.0, 90.0)
         static let SearchLonRange = (-180.0, 180.0)
     }
