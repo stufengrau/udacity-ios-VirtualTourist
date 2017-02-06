@@ -106,13 +106,15 @@ extension CoreDataStack {
             
             batch(self.backgroundContext)
             
-            // Save it to the parent context, so normal saving
-            // can work
+            // Save it to the parent context, so normal saving can work
             do {
                 try self.backgroundContext.save()
             } catch {
                 fatalError("Error while saving backgroundContext: \(error)")
             }
+            // Data Core Object are only created, modified and deleted in this function
+            // so we can save here and autosave is no longer needed
+            self.save()
         }
     }
 }
@@ -148,18 +150,4 @@ extension CoreDataStack {
         }
     }
     
-    func autoSave(_ delayInSeconds : Int) {
-        
-        if delayInSeconds > 0 {
-            debugPrint("Autosaving")
-            self.save()
-            
-            let delayInNanoSeconds = UInt64(delayInSeconds) * NSEC_PER_SEC
-            let time = DispatchTime.now() + Double(Int64(delayInNanoSeconds)) / Double(NSEC_PER_SEC)
-            
-            DispatchQueue.main.asyncAfter(deadline: time) {
-                self.autoSave(delayInSeconds)
-            }
-        }
-    }
 }
