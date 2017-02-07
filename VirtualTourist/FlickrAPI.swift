@@ -21,7 +21,12 @@ class FlickrAPI {
     // MARK: Properties
     
     private var session = URLSession.shared
+    // Number of photos per pin
     private let photosPerPage = 21
+    private let maxFlickrResults = 4000
+    
+    // Upper Limit of Pages
+    private var maxFlickrPages: Int { return maxFlickrResults / photosPerPage }
     
     var stack: CoreDataStack {
         let delegate = UIApplication.shared.delegate as! AppDelegate
@@ -63,14 +68,8 @@ class FlickrAPI {
                     return
             }
             
-            debugPrint("totalPages: \(totalPages)")
-            
-            // pick a random page!
-            let randomPage = Int(arc4random_uniform(UInt32(totalPages))) + 1
-            debugPrint("Random Page: \(randomPage)")
-            
             // Get image URLs from Flickr for a random page
-            self.getFlickrImageURLs(pin, methodParameters, withPageNumber: randomPage, completionHandler: completionHandler)
+            self.getFlickrImageURLs(pin, methodParameters, withPageNumber: self.getRandomPage(totalPages), completionHandler: completionHandler)
             
             }.resume()
         
@@ -137,7 +136,7 @@ class FlickrAPI {
             self.stack.performBackgroundBatchOperation { (workerContext) in
                 // First the photo object itself was a parameter of the getFlickrImage method
                 // but the lifetime of the object was to long and caused site effects
-                // Therefore directly fetch the photo object for the specified URL 
+                // Therefore fetch the photo object for the specified URL
                 // If pins are close enough to each other, their search radius can overlap and a
                 // URL might not be unique, so the image data for all returned photo objects is set
                 let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Photo")
@@ -211,5 +210,19 @@ class FlickrAPI {
         let maximumLon = min(longitude + BBox.SearchBBoxHalfWidth, BBox.SearchLonRange.1)
         let maximumLat = min(latitude + BBox.SearchBBoxHalfHeight, BBox.SearchLatRange.1)
         return "\(minimumLon),\(minimumLat),\(maximumLon),\(maximumLat)"
+    }
+    
+    // Get a random page inside flickr results
+    private func getRandomPage(_ totalPages: Int) -> Int {
+        // If there is more than one page, ignore the last page
+        // the last page may contain less then 'photosPerPage' Images
+        var pages = totalPages
+        if totalPages > 1 {
+            pages = totalPages - 1
+        }
+        // Limit Pages to match upper limit of flickr results
+        let maxPage = min(pages, maxFlickrPages)
+        let randomPage = Int(arc4random_uniform(UInt32(maxPage))) + 1
+        return randomPage
     }
 }
