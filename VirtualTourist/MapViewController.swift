@@ -82,7 +82,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             annotation.coordinate = coordinate
             
             // Save the pin in core data and add annotation to the map
-            self.stack.performBackgroundBatchOperation { (workerContext) in
+            stack.performBackgroundBatchOperation { (workerContext) in
                 _ = Pin(latitude: coordinate.latitude, longitude: coordinate.longitude, context: workerContext)
             }
             mapView.addAnnotation(annotation)
@@ -152,7 +152,7 @@ extension MapViewController {
         if let pins = try? stack.backgroundContext.fetch(fetchRequest) as! [NSManagedObject] {
             if let pin = pins.first {
                 if editMode! {
-                    self.stack.performBackgroundBatchOperation { $0.delete(pin) }
+                    stack.performBackgroundBatchOperation { $0.delete(pin) }
                     mapView.removeAnnotation(annotation)
                 } else {
                     let vc = storyboard?.instantiateViewController(withIdentifier: "photosViewController") as! PhotosViewController

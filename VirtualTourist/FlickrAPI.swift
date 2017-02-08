@@ -71,13 +71,13 @@ class FlickrAPI {
             // Get image URLs from Flickr for a random page
             self.getFlickrImageURLs(pin, methodParameters, withPageNumber: self.getRandomPage(totalPages), completionHandler: completionHandler)
             
-            }.resume()
+        }.resume()
         
     }
     
     // Get image URLs from Flickr for a specified page
     private func getFlickrImageURLs(_ pin: Pin, _ methodParameters: [String: String], withPageNumber: Int,
-                                                completionHandler: @escaping (getFlickrImagesResult) -> Void) {
+                                    completionHandler: @escaping (getFlickrImagesResult) -> Void) {
         
         // add the page to the method's parameters
         var methodParametersWithPageNumber = methodParameters
@@ -86,7 +86,7 @@ class FlickrAPI {
         let request = URLRequest(url: flickrURLFromParameters(methodParametersWithPageNumber))
         
         session.dataTask(with: request) { (data, response, error) in
-
+            
             guard let parsedResult = self.getResult(data: data, response: response, error: error) else {
                 completionHandler(.failure)
                 return
@@ -126,7 +126,7 @@ class FlickrAPI {
     func getFlickrImage(for url: String) {
         
         let imageURL = URL(string: url)
-
+        
         session.dataTask(with: imageURL!) {data, _, _ in
             
             guard let data = data else {
@@ -165,7 +165,7 @@ class FlickrAPI {
             return nil
         }
         
-        guard let parsedResult = self.convertData(data) as? [String: AnyObject] else {
+        guard let parsedResult = convertData(data) as? [String: AnyObject] else {
             return nil
         }
         

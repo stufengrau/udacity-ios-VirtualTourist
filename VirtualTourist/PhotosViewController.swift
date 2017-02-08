@@ -62,7 +62,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
             try? fc.performFetch()
         }
     }
-
+    
     
     // MARK: View Lifecycle
     
@@ -74,7 +74,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
         annotation.coordinate = CLLocationCoordinate2DMake(pin.latitude, pin.longitude)
         mapView.addAnnotation(annotation)
         mapView.region = MKCoordinateRegion(center: annotation.coordinate, span: MKCoordinateSpanMake(spanDelta, spanDelta))
-
+        
         newCollectionButton.isEnabled = false
         noImagesFoundLabel.isHidden = true
         collectionView.allowsMultipleSelection = true
@@ -105,11 +105,11 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
     
     // Button to delete selected pins or renew entire collection
     @IBAction func collectionButton(_ sender: UIButton) {
-
+        
         if editMode! {
             // Delete selected photos
             let photosToDelete = selectedPhotos
-            self.stack.performBackgroundBatchOperation { (workerContext) in
+            stack.performBackgroundBatchOperation { (workerContext) in
                 if let photos = try? workerContext.fetch(self.fetchRequest) as! [Photo] {
                     for photoIndex in photosToDelete! {
                         workerContext.delete(photos[photoIndex.row])
@@ -122,7 +122,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
             newCollectionButton.isEnabled = false
             
             // Delete photos of previous collection
-            self.stack.performBackgroundBatchOperation { (workerContext) in
+            stack.performBackgroundBatchOperation { (workerContext) in
                 if let allPhotosForPin = try? workerContext.fetch(self.fetchRequest) as! [NSManagedObject] {
                     for photo in allPhotosForPin {
                         workerContext.delete(photo)
@@ -134,8 +134,8 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
             getFlickrImagePages()
         }
     }
-
-
+    
+    
     // MARK: Helper
     
     // Try to get URLs for a new collection of photos for specified pin
@@ -162,12 +162,12 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
     
     // Display an alert message
     private func showAlert(_ errormessage: String) {
-            let alertController = UIAlertController(title: "", message: errormessage, preferredStyle: .alert)
-            let dismissAction = UIAlertAction(title: "Dismiss", style: .cancel, handler: nil)
-            alertController.addAction(dismissAction)
-            self.present(alertController, animated: true, completion: nil)
+        let alertController = UIAlertController(title: "", message: errormessage, preferredStyle: .alert)
+        let dismissAction = UIAlertAction(title: "Dismiss", style: .cancel, handler: nil)
+        alertController.addAction(dismissAction)
+        self.present(alertController, animated: true, completion: nil)
     }
-
+    
     // Set Flow layout for collection view
     private func setGridLayout(_ size: CGSize) {
         
@@ -189,7 +189,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
         flowLayout.minimumLineSpacing = spacing
         flowLayout.itemSize = CGSize(width: dimension, height: dimension)
     }
-
+    
 }
 
 extension PhotosViewController: UICollectionViewDataSource, UICollectionViewDelegate {
@@ -213,7 +213,7 @@ extension PhotosViewController: UICollectionViewDataSource, UICollectionViewDele
         let photo = photos[indexPath.row]
         
         cell.configureCell(image: photo.image)
-
+        
         // If there is no image data yet, get the Image
         if photo.image == nil {
             if let url = photo.url {
