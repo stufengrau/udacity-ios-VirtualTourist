@@ -16,6 +16,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
     // MARK: Properties
     
     let reuseIdentifier = "photo"
+    let spanDelta = 0.02
     var insertPhotosAtIndexes: [IndexPath]!
     var deletePhotosAtIndexes: [IndexPath]!
     var selectedPhotos: [IndexPath]!
@@ -72,7 +73,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
         let annotation = MKPointAnnotation()
         annotation.coordinate = CLLocationCoordinate2DMake(pin.latitude, pin.longitude)
         mapView.addAnnotation(annotation)
-        mapView.region = MKCoordinateRegion(center: annotation.coordinate, span: MKCoordinateSpanMake(0.05, 0.05))
+        mapView.region = MKCoordinateRegion(center: annotation.coordinate, span: MKCoordinateSpanMake(spanDelta, spanDelta))
 
         newCollectionButton.isEnabled = false
         noImagesFoundLabel.isHidden = true
@@ -91,6 +92,7 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
         // If pin has no images yet, get URLs from Flickr
         if let fetchResult = try? stack.backgroundContext.fetch(fetchRequest) as! [Photo] {
             if fetchResult.count == 0 {
