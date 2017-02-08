@@ -160,14 +160,6 @@ class PhotosViewController: UIViewController, MKMapViewDelegate  {
         }
     }
     
-    // Display an alert message
-    private func showAlert(_ errormessage: String) {
-        let alertController = UIAlertController(title: "", message: errormessage, preferredStyle: .alert)
-        let dismissAction = UIAlertAction(title: "Dismiss", style: .cancel, handler: nil)
-        alertController.addAction(dismissAction)
-        self.present(alertController, animated: true, completion: nil)
-    }
-    
     // Set Flow layout for collection view
     private func setGridLayout(_ size: CGSize) {
         

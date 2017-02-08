@@ -58,12 +58,17 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             mapView.region = region
         }
         
-        // try to retrieve and add annotations to the map
+        // Try to retrieve and add annotations to the map
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Pin")
         if let pins = try? stack.context.fetch(fetchRequest) as! [Pin] {
             mapView.addAnnotations(pins.map({
                 $0.makeAnnotation()
             }))
+        }
+        
+        // Display an alert if no Flickr API Key is provided
+        if FlickrAPI.FlickrAPIKey.APIKey == "" {
+            showAlert("Please provide a Flickr API Key in the FlickrAPIKey.swift file")
         }
     }
     
