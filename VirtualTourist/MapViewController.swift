@@ -17,39 +17,19 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     @IBOutlet weak var deletionHint: UILabel!
     @IBOutlet weak var mapView: MKMapView!
     
-    var doneButton: UIBarButtonItem?
-    var editButton: UIBarButtonItem?
-    
     var stack: CoreDataStack {
         let delegate = UIApplication.shared.delegate as! AppDelegate
         return delegate.stack
     }
     
-    // Edit mode to delete pins
-    var editMode: Bool! {
-        didSet {
-            if editMode! {
-                navigationItem.rightBarButtonItem = doneButton
-                deletionHint.isHidden = false
-                mapView.frame.origin.y -= deletionHint.bounds.size.height
-            } else {
-                navigationItem.rightBarButtonItem = editButton
-                deletionHint.isHidden = true
-                mapView.frame.origin.y += deletionHint.bounds.size.height
-            }
-        }
-    }
-    
-    
     // MARK: View Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(toggleEditMode(_:)))
-        editButton = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(toggleEditMode(_:)))
-        
-        editMode = false
+
+        // Set intital editing behaviour and add editButton to Navigation Bar
+        setEditing(false, animated: true)
+        navigationItem.rightBarButtonItem = editButtonItem
         
         mapView.delegate = self
         
@@ -92,11 +72,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             }
             mapView.addAnnotation(annotation)
         }
-    }
-    
-    // Enable / disable edit mode to delete / add pins
-    func toggleEditMode(_ sender: UIBarButtonItem) {
-        editMode = !editMode
     }
     
 }
@@ -156,7 +131,7 @@ extension MapViewController {
         // else transition to the photos view controller
         if let pins = try? stack.backgroundContext.fetch(fetchRequest) as! [NSManagedObject] {
             if let pin = pins.first {
-                if editMode! {
+                if isEditing {
                     stack.performBackgroundBatchOperation { $0.delete(pin) }
                     mapView.removeAnnotation(annotation)
                 } else {
@@ -165,6 +140,17 @@ extension MapViewController {
                     navigationController?.pushViewController(vc, animated: true)
                 }
             }
+        }
+    }
+    
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: true)
+        if editing {
+            deletionHint.isHidden = false
+            mapView.frame.origin.y -= deletionHint.bounds.size.height
+        } else {
+            deletionHint.isHidden = true
+            mapView.frame.origin.y += deletionHint.bounds.size.height
         }
     }
     
