@@ -16,6 +16,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     @IBOutlet weak var deletionHint: UILabel!
     @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet weak var deletionHintBottomConstraint: NSLayoutConstraint!
     
     var stack: CoreDataStack {
         let delegate = UIApplication.shared.delegate as! AppDelegate
@@ -30,6 +31,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         // Set intital editing behaviour and add editButton to Navigation Bar
         setEditing(false, animated: true)
         navigationItem.rightBarButtonItem = editButtonItem
+        // Hide deletion hint
+        deletionHintBottomConstraint.constant -= deletionHint.bounds.size.height
         
         mapView.delegate = self
         
@@ -49,6 +52,17 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         // Display an alert if no Flickr API Key is provided
         if FlickrAPI.FlickrAPIKey.APIKey == "" {
             showAlert("Please provide a Flickr API Key in the FlickrAPIKey.swift file")
+        }
+    }
+    
+    // MARK: Editing Mode
+    
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: true)
+        // Display deletion hint label when in editing mode
+        UIView.animate(withDuration: 0.5) {
+            self.deletionHintBottomConstraint.constant = editing ? 0 : -(self.deletionHint.bounds.size.height)
+            self.view.layoutIfNeeded()
         }
     }
     
@@ -140,17 +154,6 @@ extension MapViewController {
                     navigationController?.pushViewController(vc, animated: true)
                 }
             }
-        }
-    }
-    
-    override func setEditing(_ editing: Bool, animated: Bool) {
-        super.setEditing(editing, animated: true)
-        if editing {
-            deletionHint.isHidden = false
-            mapView.frame.origin.y -= deletionHint.bounds.size.height
-        } else {
-            deletionHint.isHidden = true
-            mapView.frame.origin.y += deletionHint.bounds.size.height
         }
     }
     
